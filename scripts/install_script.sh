@@ -10,3 +10,6 @@ virtualenv $WORK_ENV
 source $WORK_ENV_ACTIVATE
 
 sudo pip install Django==1.10
+sudo pip install mysqlclient==1.3.10
+sudo pip install mock==2.0.0
+sudo pip install freezegun==0.3.8
