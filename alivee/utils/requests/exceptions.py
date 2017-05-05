@@ -1,0 +1,2 @@
+class RequestMethodNotSupportedException(Exception):
+    pass

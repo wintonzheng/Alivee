@@ -1,0 +1,2 @@
+class EmptyAreaInputException(Exception):
+    pass
