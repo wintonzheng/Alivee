@@ -11,7 +11,7 @@ from general_utils.requests.google.place_search.exceptions import ExceedMaximumM
 from general_utils.requests.google.place_search.utils import PlaceSearch
 from place_search_engine.constants import CityBoundaryPointsInfo
 
-MAX_BACKFILL_RADIUS_IN_METERS = 1500
+MAX_BACKFILL_RADIUS_IN_METERS = 1000
 
 
 def _getDistanceBetweenTwoPoints(point1, point2):
@@ -39,17 +39,20 @@ def _getBackfillCenterPoints(upperLeftPoint, lowerRightPoint, width, height):
 	potentialPointsCountInHeightDir = int(math.ceil(height / MAX_BACKFILL_RADIUS_IN_METERS)) + 1
 
 	backfillCenterPointsToInclude = []
-	(currentLat, currentLng), (lastLat, lastLng) = upperLeftPoint, lowerRightPoint
+	(firstLat, firstLng), (lastLat, lastLng) = upperLeftPoint, lowerRightPoint
 	isPointToIncludeInHeightDir = True
 
+	currentLat, currentLng = firstLat, firstLng
 	for heightIndex in xrange(potentialPointsCountInHeightDir):
-		# Set `currentLng` to current value in height direction by using height index.
-		currentLng = currentLng + (lastLng - currentLng) * heightIndex / (potentialPointsCountInHeightDir - 1)
+		# Set `currentLat` to current value in height direction by using height index.
+		currentLat = currentLat + (lastLat - currentLat) * heightIndex / (potentialPointsCountInHeightDir - 1)
 		isPointToIncludeInWidthDir = isPointToIncludeInHeightDir
 
+		currentLng = firstLng
 		for widthIndex in xrange(potentialPointsCountInWidthDir):
-			# Set `currentLat` to current value in width direction by using width index.
-			currentLat = currentLat + (lastLat - currentLat) * widthIndex / (potentialPointsCountInWidthDir - 1)
+			# Set `currentLng` to current value in width direction by using width index.
+			currentLng = currentLng + (lastLng - currentLng) * widthIndex / (potentialPointsCountInWidthDir - 1)
+
 			if isPointToIncludeInWidthDir:
 				backfillCenterPointsToInclude.append([currentLat, currentLng])
 
@@ -62,10 +65,12 @@ def _getBackfillCenterPoints(upperLeftPoint, lowerRightPoint, width, height):
 	return backfillRadius, backfillCenterPointsToInclude
 
 
-def backfillPlaces(key, boundaryPointsInfo=None, isVerboseMode=True, saveToDb=True):
+def searchPlacesByTypeInArea(key, place_type=PlaceSearchPlaceType.RESTAURANT.value, boundaryPointsInfo=None, 
+	isVerboseMode=True, saveToDb=True):
 	'''
-	Util method for backfilling all places we are insterested in the rectangle area defined by boundary points.
-	TODO(Yang): Need to consume parsed data to db after completing models.
+	Util method for searching all places we are insterested by type in the rectangle area defined by boundary points.
+	TODO(Yang): Improve this method to have more input params, consume parsed data to db after completing models.py
+	and can export search result to .csv file as log.
 
 	param key: The Google API key, generated in google dev console, ask project dev for help.
 	param boundaryPointsInfo: The boundary points info, describing the rectangle area we want to backfill. 
@@ -90,6 +95,7 @@ def backfillPlaces(key, boundaryPointsInfo=None, isVerboseMode=True, saveToDb=Tr
 			)
 			backfillAreaInfos.append((areaWidth, areaHight, backfillCenterPointsToInclude, backfillRadius))
 
+	allParsedResults = []
 	for areaIndex, (areaWidth, areaHight, centerPoints, radius) in enumerate(backfillAreaInfos, 1):
 		if isVerboseMode:
 			print '\n' + '==' * 20
@@ -106,7 +112,12 @@ def backfillPlaces(key, boundaryPointsInfo=None, isVerboseMode=True, saveToDb=Tr
 			googlePlaceSearch = PlaceSearch(key=key, location=centerPoint)
 
 			try:
-				allParsedResults = googlePlaceSearch.nearbySearch(PlaceSearchPlaceType.RESTAURANT.value, radius)
+				parsedResults = googlePlaceSearch.nearbySearch(
+					place_type=place_type, 
+					radius=radius,
+					isVerboseMode=isVerboseMode,
+				)
+				allParsedResults.extend(parsedResults)
 			except ExceedMaximumMainRequestRetryCountException:
 				# Following query with different center point may not fail, skip current center point.
 				if isVerboseMode:
@@ -114,3 +125,15 @@ def backfillPlaces(key, boundaryPointsInfo=None, isVerboseMode=True, saveToDb=Tr
 				pass
 
 			time.sleep(1)
+
+	if isVerboseMode:
+		print '\n Total ' + '==' * 20
+		if not allParsedResults:
+			print 'No results found in nearby response!'
+		else:
+			for index, parsedResult in enumerate(allParsedResults, 1):
+				print '--' * 20
+				# For unicode output, see https://pythonhosted.org/kitchen/unicode-frustrations.html
+				print 'index: {}, name: {}, location: {}'.format(
+					index, parsedResult.get('name').encode('utf8', 'replace'), parsedResult.get('location'))
+				print 'placeId: {}, icon: {}\n'.format(parsedResult.get('placeId'), parsedResult.get('icon'))
