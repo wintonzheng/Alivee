@@ -12,6 +12,16 @@ class InvalidResponseStatusException(BaseGooglePlaceSearchException):
 		super(InvalidResponseStatusException, self).__init__(msg)
 
 
+class InvalidRequestAPIKeyException(BaseGooglePlaceSearchException):
+	'''
+	Raised when api key is not valid and declined by google place search server.
+	'''
+	def __init__(self, key):
+		self.key = key
+		msg = 'Invalid API key provided: {}!'.format(self.key)
+		super(InvalidRequestAPIKeyException, self).__init__(msg)
+
+
 class InvalidRequestPlaceTypeException(BaseGooglePlaceSearchException):
 	'''
 	Raised when request of google place search does not include valid place type.
@@ -51,11 +61,21 @@ class IncompleteRequestRankByRelatedParamsException(BaseGooglePlaceSearchExcepti
 		super(IncompleteRequestRankByRelatedParamsException, self).__init__(msg)
 
 
-class ExceedMaximumNextPageRetryTimesException(Exception):
+class ExceedMaximumNextPageRequestRetryCountException(Exception):
 	'''
-	Raised when next page retry times exceed the maximum value.
+	Raised when next page retry count exceed the maximum value.
 	'''
-	def __init__(self, maxRetryTimes):
-		self.maxRetryTimes = maxRetryTimes
-		msg = 'Already reached maximum next page retry times: {}!'.format(self.maxRetryTimes)
-		super(ExceedMaximumNextPageRetryTimesException, self).__init__(msg)
+	def __init__(self, maxRetryCount):
+		self.maxRetryCount = maxRetryCount
+		msg = 'Already reached maximum next page request retry count: {}!'.format(self.maxRetryCount)
+		super(ExceedMaximumNextPageRequestRetryCountException, self).__init__(msg)
+
+
+class ExceedMaximumMainRequestRetryCountException(Exception):
+	'''
+	Raised when main request retry count exceed the maximum value.
+	'''
+	def __init__(self, maxRetryCount):
+		self.maxRetryCount = maxRetryCount
+		msg = 'Already reached maximum main request retry count: {}!'.format(self.maxRetryCount)
+		super(ExceedMaximumMainRequestRetryCountException, self).__init__(msg)
