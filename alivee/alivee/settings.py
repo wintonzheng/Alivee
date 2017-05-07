@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'place_rate_engine',
     'place_search_engine',
+    'utils',
 ]
 
 MIDDLEWARE_CLASSES = [

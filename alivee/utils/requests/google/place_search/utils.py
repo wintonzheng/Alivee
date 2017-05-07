@@ -1,10 +1,20 @@
-import googlemaps
-import datetime
-import json
+# Put Standard Library Imports Here:
 import time
-from place_search_engine.constants.google_place_api import PlaceSearchResponseStatus
-from place_search_engine.constants.google_place_api import PLACE_SERVICE_SEARCH_PLACE_TYPES
-from place_search_engine.constants.google_place_api import MAX_PLACE_SERACH_RADIUS_IN_METERS
+
+# Put Third Party/Django Imports Here:
+import googlemaps
+
+# Put Alivee Imports Here:
+from .constants import MAX_PLACE_SERACH_RADIUS_IN_METERS
+from .constants import PLACE_SEARCH_REQUEST_PLACE_TYPES
+from .constants import PlaceSearchRankByMethod
+from .constants import PlaceSearchResponseStatus
+from .exceptions import ConflictRequestRadiusRankByException
+from .exceptions import ExceedMaximumNextPageRetryTimesException
+from .exceptions import ExceedRequestMaximumRadiusException
+from .exceptions import IncompleteRequestRankByRelatedParamsException
+from .exceptions import InvalidRequestPlaceTypeException
+from .exceptions import InvalidResponseStatusException
 
 MAX_NEXT_PAGE_TOKEN_RETRY_COUNT = 3
 
@@ -22,12 +32,12 @@ class PlaceSearch(object):
 	)
 
 	placeSearchInstance.nearbySearch(
-		place_type=PlaceServicePlaceType.BANK, 
+		place_type=PlaceSearchPlaceType.BANK, 
 		radius=1000,
 	)
 	OR:
 	placeSearchInstance.radarSearch(
-		place_type=PlaceServicePlaceType.BANK, 
+		place_type=PlaceSearchPlaceType.BANK, 
 		radius=1000,
 	)
 	'''
@@ -42,7 +52,8 @@ class PlaceSearch(object):
 		# NOTE: Need to handle exception in caller's method such as `ValueError: Invalid API key provided.`
 		self.client = googlemaps.Client(key)
 
-	def _getPlaceFilterKwargs(self, place_type, radius, keyword, name, rank_by, page_token):
+	def _getPlaceFilterKwargs(self, place_type=None, radius=None, keyword=None, name=None, rank_by=None, 
+		page_token=None):
 		'''
 		Private helper method to pre-check and create the filter kwargs in place search query, follow format of
 		https://github.com/googlemaps/google-maps-services-python/blob/master/googlemaps/places.py#L199
@@ -54,23 +65,39 @@ class PlaceSearch(object):
 		filterKwargs = dict(location=self.location)
 
 		if place_type:
-			if not place_type in PLACE_SERVICE_SEARCH_PLACE_TYPES:
-				raise ValueError('Invalid place type, pre-check failed!'.format(place_type))
+			# Check then include `place type` info.
+			if not place_type in PLACE_SEARCH_REQUEST_PLACE_TYPES:
+				raise InvalidRequestPlaceTypeException(placeType=place_type)
 			filterKwargs['type'] = place_type
+
 		if radius:
+			# Check then include `radius` info.
 			if radius > MAX_PLACE_SERACH_RADIUS_IN_METERS:
-				raise ValueError('Radius: {} exceeds maximum allowed value: {}, pre-check failed!'.format(
-					radius, MAX_PLACE_SERACH_RADIUS_IN_METERS))
+				raise ExceedMaximumRequestRadiusException(radius=radius, maxRadius=MAX_PLACE_SERACH_RADIUS_IN_METERS)
 			filterKwargs['radius'] = radius
+
 		if keyword:
+			# Check then include `keyword` info.
 			filterKwargs['keyword'] = keyword
+
 		if name:
+			# Check then include `name` info.
 			filterKwargs['name'] = name
+
 		if rank_by:
-			if rank_by and radius:
-				raise ValueError('Cannot set both rank_by and radius, pre-check failed!')
+			# Check then include `rank_by` info.
+			if rank_by == PlaceSearchRankByMethod.DISTANCE:
+
+				if radius:
+					raise ConflictRequestRadiusRankByException()
+
+				if (not place_type) and (not keyword) and (not name):
+					raise IncompleteRequestRankByRelatedParamsException()
+
 			filterKwargs['rank_by'] = rank_by
+
 		if page_token:
+			# Check then include `page_token` info.
 			filterKwargs['page_token'] = page_token
 
 		return filterKwargs
@@ -80,23 +107,16 @@ class PlaceSearch(object):
 		Private helper method to check if the status of google place search response is valid.
 
 		param response: Response of google place search query, notice `googlemaps` package already parses the 
-		JSON format response to dict - list format for us.
-		return: A none-boolean value represents whether the response is valid, `None` value means response is valid
-		but there is no real content in it.
-
-		NOTE: If response is not valid, exception will be raised instead of returning `False` value.
+		JSON format response to `dict - list` format for us.
+		return: `True` means the status in response is valid, otherwise an InvalidResponseStatusException will be raised.
 		'''
-		if not response or not 'status' in response:
-			raise Exception('Invalid response!')
+		response = response or {}
+		status = response.get('status')
 
-		status = response['status']
+		if status not in [PlaceSearchResponseStatus.OK.value, PlaceSearchResponseStatus.ZERO_RESULTS.value]:
+			raise InvalidResponseStatusException(status=status)
 
-		if status == PlaceSearchResponseStatus.ZERO_RESULTS:
-			return None
-		elif status == PlaceSearchResponseStatus.OK:
-			return True
-
-		raise Exception('Invalid response with status code {}'.format(status))
+		return True
 
 	def _parseNearbySearchResponse(self, response):
 		'''
@@ -111,44 +131,40 @@ class PlaceSearch(object):
 		allParsedResults = []
 
 		try:
-			hasResult = self._checkReponseStatus(response)
+			self._checkReponseStatus(response=response)
 		except:
 			raise
 		else:
-			if hasResult:
-				resultMaps = response.get('results', [])
-				# Indicate whether there is next page of results since maximum results number show in 1 page is 20.
-				next_page_token = response.get('next_page_token')
+			resultMaps = response.get('results', [])
+			# Indicate whether there is next page of results since maximum results number show in 1 page is 20.
+			next_page_token = response.get('next_page_token')
 
-				for resultMap in resultMaps:
-					allParsedResults.append(dict(
-						placeId=resultMap.get('place_id'),
-						types=resultMap.get('types', []),
-						icon=resultMap.get('icon'),
-						name=resultMap.get('name'),
-						location=resultMap.get('geometry', {}).get('location', {}),
-					))
+			for resultMap in resultMaps:
+				allParsedResults.append(dict(
+					placeId=resultMap.get('place_id'),
+					types=resultMap.get('types', []),
+					icon=resultMap.get('icon'),
+					name=resultMap.get('name'),
+					location=resultMap.get('geometry', {}).get('location', {}),
+				))
 
-				if next_page_token:
-					retry_count = 0
-					hasNextPageResult = False
+			if next_page_token:
+				retry_count = 0
+				hasNextPageResult = False
 
-					while not hasNextPageResult and retry_count <= MAX_NEXT_PAGE_TOKEN_RETRY_COUNT:
-						# Sometimes there is delay when `next_page_token` is issued, sleep 2 seconds and retry 3 times.
-						time.sleep(2)
+				while not hasNextPageResult and retry_count <= MAX_NEXT_PAGE_TOKEN_RETRY_COUNT:
+					# Sometimes there is delay when `next_page_token` is issued, sleep 2 seconds and retry 3 times.
+					time.sleep(2)
 
-						if retry_count:
-							print 'Retrying {} times for fetching next page results...'.format(retry_count)
-						try: 
-							nextPageParsedResults = self.nearbySearch(page_token=next_page_token, isVerboseMode=False)
-						except:
-							retry_count += 1
-							if retry_count > MAX_NEXT_PAGE_TOKEN_RETRY_COUNT:
-								print 'Already reached maximum next page retry times: {}.'.format(
-									MAX_NEXT_PAGE_TOKEN_RETRY_COUNT)
-						else:
-							hasNextPageResult = True
-							allParsedResults.extend(nextPageParsedResults)
+					try: 
+						nextPageParsedResults = self.nearbySearch(page_token=next_page_token, isVerboseMode=False)
+					except:
+						retry_count += 1
+						if retry_count > MAX_NEXT_PAGE_TOKEN_RETRY_COUNT:
+							raise ExceedMaximumNextPageRetryTimesException(maxRetryTimes=MAX_NEXT_PAGE_TOKEN_RETRY_COUNT)
+					else:
+						hasNextPageResult = True
+						allParsedResults.extend(nextPageParsedResults)
 
 		return allParsedResults
 
@@ -202,7 +218,7 @@ class PlaceSearch(object):
 					# For unicode output, see https://pythonhosted.org/kitchen/unicode-frustrations.html
 					print 'index: {}, name: {}, location: {}'.format(
 						index, parsedResult.get('name').encode('utf8', 'replace'), parsedResult.get('location'))
-					print 'placeId: {}, icon: {}'.format(parsedResult.get('placeId'), parsedResult.get('icon'))
+					print 'placeId: {}, icon: {}\n'.format(parsedResult.get('placeId'), parsedResult.get('icon'))
 
 		return allParsedResults
 
@@ -214,7 +230,7 @@ class PlaceSearch(object):
 		param isVerboseMode: A boolean flag indicates if helper text will be printed for debugging.
 		return: A list of all parsed results for place search query.
 
-		NOTE: Not all params included for query search such as `minprice` and `maxprice`, if needed, more params
+		NOTE: Not all params are included for query search such as `minprice` and `maxprice`, if needed, more params
 		can be added later.
 		'''
 		filterKwargs = self._getPlaceFilterKwargs(place_type, radius, keyword, name, rank_by, page_token=None)
@@ -227,7 +243,7 @@ class PlaceSearch(object):
 			else:
 				for index, parsedResult in enumerate(allParsedResults, 1):
 					print '--' * 20
-					print 'index: {}, placeId: {}, location: {}'.format(
+					print 'index: {}, placeId: {}, location: {}\n'.format(
 						index, parsedResult.get('placeId'), parsedResult.get('location'))
 
 		return allParsedResults

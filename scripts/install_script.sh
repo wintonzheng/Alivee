@@ -19,3 +19,4 @@ sudo pip install googlemaps==2.4.5
 sudo pip install pyOpenSSL==16.2.0
 sudo pip install ndg-httpsclient==0.4.0 
 sudo pip install pyasn1==0.1.9
+sudo pip install geopy==1.11.0

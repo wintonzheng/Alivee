@@ -1,8 +1,11 @@
 '''
 File includes constants needed for google place search API.
 '''
+# Put Standard Library Imports Here:
+from enum import Enum
 
-class PlaceSearchResponseStatus(object):
+
+class PlaceSearchResponseStatus(Enum):
 	'''
 	Class includes all statuses of response from Google place search API.
 	Documents: https://developers.google.com/places/web-service/search#PlaceSearchStatusCodes
@@ -14,7 +17,16 @@ class PlaceSearchResponseStatus(object):
 	INVALID_REQUEST = 'INVALID_REQUEST'
 
 
-class PlaceServicePlaceType(object):
+class PlaceSearchRankByMethod(Enum):
+	'''
+	class includes all methods rank_by param can use.
+	Documents: https://developers.google.com/places/web-service/search#PlaceSearchRequests
+	'''
+	PROMINENCE = 'prominence'
+	DISTANCE = 'distance'
+
+
+class PlaceSearchPlaceType(Enum):
 	'''
 	Class includes all place types we can use in place service query, deprecated types are not listed.
 	Documents: https://developers.google.com/places/web-service/supported_types
@@ -149,107 +161,105 @@ class PlaceServicePlaceType(object):
 	SUBPREMISE = 'subpremise'
 
 
-# Place types supported as param in place search query.
+# Place types supported as param in place search request query.
 # Documents: https://developers.google.com/places/web-service/supported_types#table1
-PLACE_SERVICE_SEARCH_PLACE_TYPES = [
-	PlaceServicePlaceType.ACCOUNTING,
-	PlaceServicePlaceType.AIRPORT,
-	PlaceServicePlaceType.AMUSEMENT_PARK,
-	PlaceServicePlaceType.AQUARIUM,
-	PlaceServicePlaceType.ART_GALLERY,
-	PlaceServicePlaceType.ATM,
-	PlaceServicePlaceType.BAKERY,
-	PlaceServicePlaceType.BANK,
-	PlaceServicePlaceType.BAR,
-	PlaceServicePlaceType.BEAUTY_SALON,
-	PlaceServicePlaceType.BICYCLE_STORE,
-	PlaceServicePlaceType.BOOK_STORE,
-	PlaceServicePlaceType.BOWLING_ALLEY,
-	PlaceServicePlaceType.BUS_STATION,
-	PlaceServicePlaceType.CAFE,
-	PlaceServicePlaceType.CAMPGROUND,
-	PlaceServicePlaceType.CAR_DEALER,
-	PlaceServicePlaceType.CAR_RENTAL,
-	PlaceServicePlaceType.CAR_REPAIR,
-	PlaceServicePlaceType.CAR_WASH,
-	PlaceServicePlaceType.CASINO,
-	PlaceServicePlaceType.CEMETERY,
-	PlaceServicePlaceType.CHURCH,
-	PlaceServicePlaceType.CITY_HALL,
-	PlaceServicePlaceType.CLOTHING_STORE,
-	PlaceServicePlaceType.CONVENIENCE_STORE,
-	PlaceServicePlaceType.COURTHOUSE,
-	PlaceServicePlaceType.DENTIST,
-	PlaceServicePlaceType.DEPARTMENT_STORE,
-	PlaceServicePlaceType.DOCTOR,
-	PlaceServicePlaceType.ELECTRICIAN,
-	PlaceServicePlaceType.ELECTRONICS_STORE,
-	PlaceServicePlaceType.EMBASSY,
-	PlaceServicePlaceType.FIRE_STATION,
-	PlaceServicePlaceType.FLORIST,
-	PlaceServicePlaceType.FUNERAL_HOME,
-	PlaceServicePlaceType.FURNITURE_STORE,
-	PlaceServicePlaceType.GAS_STATION,
-	PlaceServicePlaceType.GYM,
-	PlaceServicePlaceType.HAIR_CARE,
-	PlaceServicePlaceType.HARDWARE_STORE,
-	PlaceServicePlaceType.HINDU_TEMPLE,
-	PlaceServicePlaceType.HOME_GOODS_STORE,
-	PlaceServicePlaceType.HOSPITAL,
-	PlaceServicePlaceType.INSURANCE_AGENCY,
-	PlaceServicePlaceType.JEWELRY_STORE,
-	PlaceServicePlaceType.LAUNDRY,
-	PlaceServicePlaceType.LAWYER,
-	PlaceServicePlaceType.LIBRARY,
-	PlaceServicePlaceType.LIQUOR_STORE,
-	PlaceServicePlaceType.LOCAL_GOVERNMENT_OFFICE,
-	PlaceServicePlaceType.LOCKSMITH,
-	PlaceServicePlaceType.LODGING,
-	PlaceServicePlaceType.MEAL_DELIVERY,
-	PlaceServicePlaceType.MEAL_TAKEAWAY,
-	PlaceServicePlaceType.MOSQUE,
-	PlaceServicePlaceType.MOVIE_RENTAL,
-	PlaceServicePlaceType.MOVIE_THEATER,
-	PlaceServicePlaceType.MOVING_COMPANY,
-	PlaceServicePlaceType.MUSEUM,
-	PlaceServicePlaceType.NIGHT_CLUB,
-	PlaceServicePlaceType.PAINTER,
-	PlaceServicePlaceType.PARK,
-	PlaceServicePlaceType.PARKING,
-	PlaceServicePlaceType.PET_STORE,
-	PlaceServicePlaceType.PHARMACY,
-	PlaceServicePlaceType.PHYSIOTHERAPIST,
-	PlaceServicePlaceType.PLUMBER,
-	PlaceServicePlaceType.POLICE,
-	PlaceServicePlaceType.POST_OFFICE,
-	PlaceServicePlaceType.REAL_ESTATE_AGENCY,
-	PlaceServicePlaceType.RESTAURANT,
-	PlaceServicePlaceType.ROOFING_CONTRACTOR,
-	PlaceServicePlaceType.RV_PARK,
-	PlaceServicePlaceType.SCHOOL,
-	PlaceServicePlaceType.SHOE_STORE,
-	PlaceServicePlaceType.SHOPPING_MALL,
-	PlaceServicePlaceType.SPA,
-	PlaceServicePlaceType.STADIUM,
-	PlaceServicePlaceType.STORAGE,
-	PlaceServicePlaceType.STORE,
-	PlaceServicePlaceType.SUBWAY_STATION,
-	PlaceServicePlaceType.SYNAGOGUE,
-	PlaceServicePlaceType.TAXI_STAND,
-	PlaceServicePlaceType.TRAIN_STATION,
-	PlaceServicePlaceType.TRANSIT_STATION,
-	PlaceServicePlaceType.TRAVEL_AGENCY,
-	PlaceServicePlaceType.UNIVERSITY,
-	PlaceServicePlaceType.VETERINARY_CARE,
-	PlaceServicePlaceType.ZOO,
+_PLACE_SEARCH_REQUEST_PLACE_MAPS= [
+	PlaceSearchPlaceType.ACCOUNTING,
+	PlaceSearchPlaceType.AIRPORT,
+	PlaceSearchPlaceType.AMUSEMENT_PARK,
+	PlaceSearchPlaceType.AQUARIUM,
+	PlaceSearchPlaceType.ART_GALLERY,
+	PlaceSearchPlaceType.ATM,
+	PlaceSearchPlaceType.BAKERY,
+	PlaceSearchPlaceType.BANK,
+	PlaceSearchPlaceType.BAR,
+	PlaceSearchPlaceType.BEAUTY_SALON,
+	PlaceSearchPlaceType.BICYCLE_STORE,
+	PlaceSearchPlaceType.BOOK_STORE,
+	PlaceSearchPlaceType.BOWLING_ALLEY,
+	PlaceSearchPlaceType.BUS_STATION,
+	PlaceSearchPlaceType.CAFE,
+	PlaceSearchPlaceType.CAMPGROUND,
+	PlaceSearchPlaceType.CAR_DEALER,
+	PlaceSearchPlaceType.CAR_RENTAL,
+	PlaceSearchPlaceType.CAR_REPAIR,
+	PlaceSearchPlaceType.CAR_WASH,
+	PlaceSearchPlaceType.CASINO,
+	PlaceSearchPlaceType.CEMETERY,
+	PlaceSearchPlaceType.CHURCH,
+	PlaceSearchPlaceType.CITY_HALL,
+	PlaceSearchPlaceType.CLOTHING_STORE,
+	PlaceSearchPlaceType.CONVENIENCE_STORE,
+	PlaceSearchPlaceType.COURTHOUSE,
+	PlaceSearchPlaceType.DENTIST,
+	PlaceSearchPlaceType.DEPARTMENT_STORE,
+	PlaceSearchPlaceType.DOCTOR,
+	PlaceSearchPlaceType.ELECTRICIAN,
+	PlaceSearchPlaceType.ELECTRONICS_STORE,
+	PlaceSearchPlaceType.EMBASSY,
+	PlaceSearchPlaceType.FIRE_STATION,
+	PlaceSearchPlaceType.FLORIST,
+	PlaceSearchPlaceType.FUNERAL_HOME,
+	PlaceSearchPlaceType.FURNITURE_STORE,
+	PlaceSearchPlaceType.GAS_STATION,
+	PlaceSearchPlaceType.GYM,
+	PlaceSearchPlaceType.HAIR_CARE,
+	PlaceSearchPlaceType.HARDWARE_STORE,
+	PlaceSearchPlaceType.HINDU_TEMPLE,
+	PlaceSearchPlaceType.HOME_GOODS_STORE,
+	PlaceSearchPlaceType.HOSPITAL,
+	PlaceSearchPlaceType.INSURANCE_AGENCY,
+	PlaceSearchPlaceType.JEWELRY_STORE,
+	PlaceSearchPlaceType.LAUNDRY,
+	PlaceSearchPlaceType.LAWYER,
+	PlaceSearchPlaceType.LIBRARY,
+	PlaceSearchPlaceType.LIQUOR_STORE,
+	PlaceSearchPlaceType.LOCAL_GOVERNMENT_OFFICE,
+	PlaceSearchPlaceType.LOCKSMITH,
+	PlaceSearchPlaceType.LODGING,
+	PlaceSearchPlaceType.MEAL_DELIVERY,
+	PlaceSearchPlaceType.MEAL_TAKEAWAY,
+	PlaceSearchPlaceType.MOSQUE,
+	PlaceSearchPlaceType.MOVIE_RENTAL,
+	PlaceSearchPlaceType.MOVIE_THEATER,
+	PlaceSearchPlaceType.MOVING_COMPANY,
+	PlaceSearchPlaceType.MUSEUM,
+	PlaceSearchPlaceType.NIGHT_CLUB,
+	PlaceSearchPlaceType.PAINTER,
+	PlaceSearchPlaceType.PARK,
+	PlaceSearchPlaceType.PARKING,
+	PlaceSearchPlaceType.PET_STORE,
+	PlaceSearchPlaceType.PHARMACY,
+	PlaceSearchPlaceType.PHYSIOTHERAPIST,
+	PlaceSearchPlaceType.PLUMBER,
+	PlaceSearchPlaceType.POLICE,
+	PlaceSearchPlaceType.POST_OFFICE,
+	PlaceSearchPlaceType.REAL_ESTATE_AGENCY,
+	PlaceSearchPlaceType.RESTAURANT,
+	PlaceSearchPlaceType.ROOFING_CONTRACTOR,
+	PlaceSearchPlaceType.RV_PARK,
+	PlaceSearchPlaceType.SCHOOL,
+	PlaceSearchPlaceType.SHOE_STORE,
+	PlaceSearchPlaceType.SHOPPING_MALL,
+	PlaceSearchPlaceType.SPA,
+	PlaceSearchPlaceType.STADIUM,
+	PlaceSearchPlaceType.STORAGE,
+	PlaceSearchPlaceType.STORE,
+	PlaceSearchPlaceType.SUBWAY_STATION,
+	PlaceSearchPlaceType.SYNAGOGUE,
+	PlaceSearchPlaceType.TAXI_STAND,
+	PlaceSearchPlaceType.TRAIN_STATION,
+	PlaceSearchPlaceType.TRANSIT_STATION,
+	PlaceSearchPlaceType.TRAVEL_AGENCY,
+	PlaceSearchPlaceType.UNIVERSITY,
+	PlaceSearchPlaceType.VETERINARY_CARE,
+	PlaceSearchPlaceType.ZOO,
 ]
-
+PLACE_SEARCH_REQUEST_PLACE_TYPES = [placeType.value for placeType in _PLACE_SEARCH_REQUEST_PLACE_MAPS]
 
 # Place types could be retured in place search response.
 # Documents: https://developers.google.com/places/web-service/supported_types#table2
-PLACE_SERVICE_RESPONSE_PLACE_TYPES = [placeType 
-	for placeType in PlaceServicePlaceType.__dict__.keys() if not placeType.startswith('__')]
-
+PLACE_SEARCH_RESPONSE_PLACE_TYPES = [placeType.value for placeType in PlaceSearchPlaceType]
 
 # Documents: Search keyword `radius` in https://developers.google.com/places/web-service/search
 MAX_PLACE_SERACH_RADIUS_IN_METERS = 50000
