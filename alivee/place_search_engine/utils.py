@@ -6,9 +6,9 @@ import time
 from geopy.distance import vincenty
 
 # Put Alivee Imports Here:
-from common_utils.requests.google.place_search.constants import PlaceSearchPlaceType
-from common_utils.requests.google.place_search.exceptions import ExceedMaximumMainRequestRetryCountException
-from common_utils.requests.google.place_search.utils import PlaceSearch
+from general_utils.requests.google.place_search.constants import PlaceSearchPlaceType
+from general_utils.requests.google.place_search.exceptions import ExceedMaximumMainRequestRetryCountException
+from general_utils.requests.google.place_search.utils import PlaceSearch
 from place_search_engine.constants import CityBoundaryPointsInfo
 
 MAX_BACKFILL_RADIUS_IN_METERS = 1500
@@ -97,7 +97,7 @@ def backfillPlaces(key, boundaryPointsInfo=None, isVerboseMode=True, saveToDb=Tr
 				areaIndex, areaWidth, areaHight, len(centerPoints), radius)
 
 		radius = int(radius)
-		for centerPointIndex, centerPoint in enumerate(centerPoints[:4], 1):
+		for centerPointIndex, centerPoint in enumerate(centerPoints, 1):
 			if isVerboseMode:
 				print '--' * 20
 				print 'Nearby search for center point index: {}, center point: {}, radius: {}.'.format(
