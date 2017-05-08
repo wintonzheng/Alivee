@@ -63,6 +63,10 @@ class RequestMeta(object):
         return self._protocol
 
     @property
+    def method(self):
+        return self._method
+
+    @property
     def url(self):
         base_url = '{0}://{1}/{2}'.format(self.protocol, self.host, self.path)
         if self.params:
