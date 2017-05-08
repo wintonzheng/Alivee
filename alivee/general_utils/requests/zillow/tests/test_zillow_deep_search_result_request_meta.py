@@ -1,7 +1,8 @@
+# Put Third Party/Django Imports Here:
 from django.test import TestCase
 
-from utils.requests.zillow.zillow_deep_search_result_request_meta \
-    import ZillowDeepSearchResultsRequestMeta
+# Put Alivee Imports Here:
+from general_utils.requests.zillow.zillow_deep_search_result_request_meta import ZillowDeepSearchResultsRequestMeta
 
 
 class TestZillowDeepSearchResultsRequestMeta(TestCase):

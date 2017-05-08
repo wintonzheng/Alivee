@@ -1,6 +1,8 @@
+# Put Third Party/Django Imports Here:
 import requests
 
-from utils.requests.zillow.zillow_base_request_meta import ZillowBaseRequestMeta
+# Put Alivee Imports Here:
+from general_utils.requests.zillow.zillow_base_request_meta import ZillowBaseRequestMeta
 
 
 class ZillowDeepSearchResultsRequestMeta(ZillowBaseRequestMeta):

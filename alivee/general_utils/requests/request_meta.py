@@ -1,6 +1,8 @@
+# Put Third Party/Django Imports Here:
 import urllib
 
-from utils.requests.exceptions import RequestMethodNotSupportedException
+# Put Alivee Imports Here:
+from general_utils.requests.exceptions import RequestMethodNotSupportedException
 
 
 class RequestMeta(object):
