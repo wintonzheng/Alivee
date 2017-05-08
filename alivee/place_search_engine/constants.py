@@ -11,14 +11,14 @@ from enum import Enum
 
 
 SAN_FRANCISCO = [
-	[
-		[37.815689, -122.517018],
-		[37.815689, -122.366381],
-		[37.708184, -122.366381],
-		[37.708184, -122.517018],
-	],
+    [
+        [37.815689, -122.517018],
+        [37.815689, -122.366381],
+        [37.708184, -122.366381],
+        [37.708184, -122.517018],
+    ],
 ]
 
 
 class CityBoundaryPointsInfo(Enum):
-	SAN_FRANCISCO = SAN_FRANCISCO
+    SAN_FRANCISCO = SAN_FRANCISCO
