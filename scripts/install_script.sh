@@ -15,3 +15,4 @@ sudo pip install mock==2.0.0
 sudo pip install freezegun==0.3.8
 sudo pip install pyflakes==1.5.0
 sudo pip install pep8==1.7.0
+sudo pip install requests==2.13.0

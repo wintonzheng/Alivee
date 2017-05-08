@@ -1,3 +1,5 @@
+import requests
+
 from utils.requests.zillow.zillow_base_request_meta import ZillowBaseRequestMeta
 
 
@@ -21,3 +23,7 @@ class ZillowDeepSearchResultsRequestMeta(ZillowBaseRequestMeta):
             'rentzestimate': rentEstimate
         }
         super(ZillowDeepSearchResultsRequestMeta, self).__init__(service_id, self.PATH, params)
+
+    def make_request(self):
+        response = requests.request(self.method, self.url)
+        return response
